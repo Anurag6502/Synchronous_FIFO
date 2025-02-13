@@ -1,0 +1,45 @@
+module AFIFOtb();
+reg [3:0] din;
+reg rst;
+reg rd_en;
+reg wr_en;
+wire [3:0] dout;
+wire full;
+wire empty;
+reg clk;
+
+SFIFO FIFOtb (.din(din), .rst(rst), .rd_en(rd_en), .wr_en(wr_en),
+.dout(dout), .full(full), .empty(empty), .clk(clk));
+always #5 clk = ~clk;
+
+initial begin
+    clk = 0;
+    rst = 1; // Ensure reset happens at the start
+    din = 0;
+    rd_en = 0;
+    wr_en = 0;
+    
+    #10 rst = 0; // Release reset
+    
+    // Write operation
+    repeat(8) begin
+        #10;
+        if (!full) begin
+            wr_en = 1;
+            din = din + 1;
+        end
+    end
+    wr_en = 0;
+
+    
+    repeat(8) begin
+        #10;
+        if (!empty) begin
+            rd_en = 1;
+        end
+    end
+    rd_en = 0;
+
+    #50 $stop;
+end
+endmodule
